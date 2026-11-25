@@ -96,10 +96,6 @@ li.got{background:var(--soft)}
   <div class="sub" id="sub" hidden role="group" aria-label="읽은 사람"></div>
   <input class="q" id="q" type="search" placeholder="제목·저자 검색" aria-label="제목 또는 저자 검색">
 </div>
-<details class="how"><summary>📱 홈 화면에 앱처럼 추가하기</summary>
-<p><b>아이폰</b> 사파리로 열고 아래 공유 버튼 → <b>홈 화면에 추가</b></p>
-<p><b>안드로이드</b> 크롬으로 열고 오른쪽 위 ⋮ → <b>홈 화면에 추가</b></p>
-<p><button type="button" class="cp" id="lk">이 페이지 주소 복사</button> 남편분께 보낼 때 쓰세요.</p></details>
 <div id="out"></div>
 <p class="note">위에서부터 차례대로 빌리면 돼요. 읽음은 영인이만 표시해요. 제인이가 읽은 책은 초록 점으로만 보여주고 목록에는 그대로 둬요. 대출중이던 책은 반납 후 확인해서 다시 올려요.</p>
 </div>
@@ -191,9 +187,8 @@ document.addEventListener("click",e=>{
   save();render();
 });
 $("q").addEventListener("input",e=>{qs=e.target.value.trim();render()});
-$("lk").addEventListener("click",e=>copy(location.href,e.target));
 $("rs").addEventListener("click",()=>{S.pick={};save();render()});
-function stampSet(){$("stamp").textContent=CHECKED+" 확인 · 대출가능 "+ALL().length+"권 · 고수가 읽은 책 먼저, 청구기호 순"}
+function stampSet(){$("stamp").textContent=CHECKED+" 확인 · 고수가 읽은 책 먼저, 청구기호 순"}
 stampSet();
 render();
 </script>
