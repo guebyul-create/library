@@ -144,7 +144,7 @@ function row(b){
   const k=key(b),got=!!S.pick[k];
   const tags=(b.go?`<span class="tg gosu">고수${b.go>1?" "+b.go:""}</span>`:"")+b.g.filter(t=>t!=="고수").map(t=>t==="교과수록"?`<span class="tg tb">${esc(b.tb||"교과수록")}</span>`:`<span class="tg">${t}</span>`).join("");
   let acts="";
-  if(tab==="wait")acts=`<button type="button" class="rd" data-a="read">읽음</button><button type="button" class="hd" data-a="hold">보류</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
+  if(tab==="wait")acts=`<button type="button" class="hd" data-a="hold">보류</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
   else if(tab==="hold")acts=`<button type="button" data-a="unhold">보류 해제</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
   else acts=`<button type="button" data-a="unread">읽음 취소</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
   return `<li class="${got?"got":""}" data-k="${esc(k)}"><input type="checkbox" aria-label="담음" ${got?"checked":""}><div><div class="h"><div class="call">${esc(b.c)}</div><div class="acts">${acts}</div></div><div class="tl">${esc(b.t)}<button type="button" class="cp" data-a="copy">복사</button></div><div class="meta">${esc(b.a)}${b.a&&b.p?" · ":""}${esc(b.p)}${(b.a||b.p)?" · ":""}<span class="lv">${b.lv}</span>${b.j&&tab!=="read"?'<span class="dotj" title="제인 읽음"></span>':""}${tags}</div></div></li>`;
