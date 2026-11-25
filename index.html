@@ -74,6 +74,7 @@ li.got{background:var(--soft)}
 .hb{margin-top:22px;border-top:1px solid var(--line);padding-top:10px}.hb summary{font-weight:700;color:var(--sub);cursor:pointer;padding:6px 0}
 .bb{margin-left:auto;font:inherit;font-weight:800;font-size:16px;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 22px;cursor:pointer}.bb:disabled{opacity:.35}
 .tabs button{font:inherit;font-weight:700;font-size:14px;padding:9px 0;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs small{margin-left:4px;font-weight:500;opacity:.85}
+li.nb{grid-template-columns:1fr}
 .off{opacity:.5}.off .tl{text-decoration:line-through}
 .empty{padding:26px;text-align:center;color:var(--sub)}
 .dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));z-index:9}
@@ -134,7 +135,7 @@ function copy(text,btn){
 function row(b,mode){
   const k=key(b),got=mode==="list"&&!!S.pick[k];
   const acts=mode==="list"?`<a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`:`<button type="button" data-a="unborrow">빌림 취소</button>`;
-  return `<li class="${got?"got":""}" data-k="${esc(k)}"><input type="checkbox" aria-label="체크" ${got?"checked":""}${mode==="list"?"":" hidden"}><div><div class="h"><div class="call">${esc(b.c)}</div><div class="acts">${acts}</div></div><div class="tl">${esc(b.t)}<button type="button" class="cp" data-a="copy">복사</button></div><div class="meta">${esc(b.a)}${b.a&&b.p?" · ":""}${esc(b.p)}</div></div></li>`;
+  return `<li class="${got?"got":""}${mode==="list"?"":" nb"}" data-k="${esc(k)}"><input type="checkbox" aria-label="체크" ${got?"checked":""}${mode==="list"?"":" hidden"}><div><div class="h"><div class="call">${esc(b.c)}</div><div class="acts">${acts}</div></div><div class="tl">${esc(b.t)}<button type="button" class="cp" data-a="copy">복사</button></div><div class="meta">${esc(b.a)}${b.a&&b.p?" · ":""}${esc(b.p)}</div></div></li>`;
 }
 function count(){
   const n=[...BOOKS,...EBOOKS].filter(b=>S.pick[key(b)]&&!isBor(b)&&!isRY(b)).length;
