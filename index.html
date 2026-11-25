@@ -69,6 +69,7 @@ input[type=checkbox]{width:24px;height:24px;accent-color:var(--accent);margin:1p
 .acts .hd{color:var(--hold);border-color:var(--hold)}
 li.got .call,li.got .tl{color:var(--sub);text-decoration:line-through}
 li.got{background:var(--soft)}
+.off{opacity:.5}.off .tl{text-decoration:line-through}
 .empty{padding:26px;text-align:center;color:var(--sub)}
 .dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));z-index:9}
 .dock div{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:10px}
@@ -97,7 +98,7 @@ li.got{background:var(--soft)}
   <input class="q" id="q" type="search" placeholder="제목·저자 검색" aria-label="제목 또는 저자 검색">
 </div>
 <div id="out"></div>
-<p class="note">위에서부터 차례대로 빌리면 돼요. 읽음은 영인이만 표시해요. 제인이가 읽은 책은 초록 점으로만 보여주고 목록에는 그대로 둬요. 대출중이던 책은 반납 후 확인해서 다시 올려요.</p>
+<p class="note">위에서부터 차례대로 빌리면 돼요. 읽음은 독서기록 시트 기준으로 정리돼요. Jane이 읽은 책은 초록 점으로만 보여주고 목록에는 그대로 둬요. 대출중이던 책은 반납 후 확인해서 다시 올려요.</p>
 </div>
 <div class="dock"><div><div class="track"><div class="fill" id="fill"></div></div><b id="cnt">0권 담음</b><button class="rs" id="rs" type="button">체크 해제</button></div></div>
 <div class="toast" id="toast" hidden></div>
@@ -114,7 +115,7 @@ const ST_KEY="gd-state-v2";
 let S={pick:{},hold:{},read:{}};
 try{const r=JSON.parse(localStorage.getItem(ST_KEY)||"null");if(r)S=Object.assign(S,r)}catch(e){}
 const save=()=>{try{localStorage.setItem(ST_KEY,JSON.stringify(S))}catch(e){}};
-let tab="wait",cat="전체",rf="영인만",qs="";
+let touched={};let tab="wait",cat="전체",rf="Ella만",qs="";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=b=>b.c+"|"+b.t;
@@ -128,11 +129,11 @@ function searchUrl(t){const q=t.split(/[:：]/)[0].replace(/\(.*?\)/g," ").trim(
 function lists(){
   const wait=ALL().filter(b=>!isHold(b)&&!isRY(b));
   const hold=ALL().filter(isHold);
-  const read=ALL().filter(b=>!isHold(b)&&(isRY(b)||b.j));
+  const read=ALL().filter(b=>!isHold(b)&&(isRY(b)||b.j||touched[key(b)]));
   return {wait,hold,read};
 }
 function readView(list){
-  return list.filter(b=>{const y=isRY(b),j=!!b.j;return rf==="영인만"?(y&&!j):rf==="제인만"?(j&&!y):(y&&j)});
+  return list.filter(b=>{if(touched[key(b)])return true;const y=isRY(b),j=!!b.j;return rf==="Ella만"?(y&&!j):rf==="Jane만"?(j&&!y):(y&&j)});
 }
 function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,1600)}
 function copy(text,btn){
@@ -146,8 +147,8 @@ function row(b){
   let acts="";
   if(tab==="wait")acts=`<button type="button" class="hd" data-a="hold">보류</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
   else if(tab==="hold")acts=`<button type="button" data-a="unhold">보류 해제</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
-  else acts=`<button type="button" data-a="unread">읽음 취소</button><a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
-  return `<li class="${got?"got":""}" data-k="${esc(k)}"><input type="checkbox" aria-label="담음" ${got?"checked":""}><div><div class="h"><div class="call">${esc(b.c)}</div><div class="acts">${acts}</div></div><div class="tl">${esc(b.t)}<button type="button" class="cp" data-a="copy">복사</button></div><div class="meta">${esc(b.a)}${b.a&&b.p?" · ":""}${esc(b.p)}${(b.a||b.p)?" · ":""}<span class="lv">${b.lv}</span>${b.j&&tab!=="read"?'<span class="dotj" title="제인 읽음"></span>':""}${tags}</div></div></li>`;
+  else acts=`${isRY(b)?'<button type="button" class="rd" data-a="unread">읽음 취소</button>':'<button type="button" class="rd" data-a="read">읽음으로</button>'}<a href="${searchUrl(b.t)}" target="_blank" rel="noopener">검색</a>`;
+  return `<li class="${got?"got":""}${tab==="read"&&!isRY(b)?" off":""}" data-k="${esc(k)}"><input type="checkbox" aria-label="담음" ${got?"checked":""}><div><div class="h"><div class="call">${esc(b.c)}</div><div class="acts">${acts}</div></div><div class="tl">${esc(b.t)}<button type="button" class="cp" data-a="copy">복사</button></div><div class="meta">${esc(b.a)}${b.a&&b.p?" · ":""}${esc(b.p)}${(b.a||b.p)?" · ":""}<span class="lv">${b.lv}</span>${b.j&&tab!=="read"?'<span class="dotj" title="Jane 읽음"></span>':""}${tags}</div></div></li>`;
 }
 function render(){
   const L=lists();
@@ -156,7 +157,7 @@ function render(){
   const base=tab==="wait"?L.wait:tab==="hold"?L.hold:L.read;
   $("chips").innerHTML=CATS().map(c=>{const n=c==="전체"?base.length:c==="고수"?base.filter(b=>b.go>0).length:base.filter(b=>b.g.includes(c)).length;return n||c==="전체"?`<button type="button" class="chip" data-c="${c}" aria-pressed="${c===cat}">${c}<small>${n}</small></button>`:""}).join("");
   $("sub").hidden=tab!=="read";
-  if(tab==="read")$("sub").innerHTML=["영인만","제인만","둘다"].map(x=>`<button type="button" data-f="${x}" aria-pressed="${x===rf}">${x}</button>`).join("");
+  if(tab==="read")$("sub").innerHTML=["Ella만","Jane만","둘다"].map(x=>`<button type="button" data-f="${x}" aria-pressed="${x===rf}">${x}</button>`).join("");
   const list=cur.filter(b=>inCat(b)&&match(b));
   const by={};list.forEach(b=>{const k=(b.go?"★ 고수 · ":"")+b.s;(by[k]=by[k]||[]).push(b)});
   const ord=k=>{const g=k.startsWith("★")?0:1;const sh=k.replace("★ 고수 · ","");const o=["유아 1F","어린이 1F","BET","WDS","AU","CH","GR","SB","LIL","FAV","NF"].indexOf(sh);return g*100+(o<0?50:o)};
@@ -165,13 +166,13 @@ function render(){
     h+=`<div class="shelf${k.startsWith("★")?" gs":""}">${esc(k)}<span>${by[k].length}권</span></div><ul>${by[k].map(row).join("")}</ul>`;
   }
   $("out").innerHTML=h||'<div class="empty">해당하는 책이 없어요</div>';
-  $("lang").innerHTML=[["ko","한글 · 강동중앙",BOOKS],["en","영어 · 송파영어",EBOOKS]].map(([id,n,arr])=>`<button type="button" data-l="${id}" aria-pressed="${lang===id}">${n}<small>${arr.filter(b=>!isHold(b)&&!isRY(b)).length}</small></button>`).join("");
+  $("lang").innerHTML=[["ko","중앙",BOOKS],["en","송파영어",EBOOKS]].map(([id,n,arr])=>`<button type="button" data-l="${id}" aria-pressed="${lang===id}">${n}<small>${arr.filter(b=>!isHold(b)&&!isRY(b)).length}</small></button>`).join("");
   const n=ALL().filter(b=>S.pick[key(b)]).length;
   $("cnt").textContent=n+"권 담음";$("fill").style.width=(n/Math.max(1,L.wait.length)*100)+"%";
 }
 document.addEventListener("click",e=>{
-  const lg=e.target.closest("[data-l]");if(lg){lang=lg.dataset.l;cat="전체";tab="wait";stampSet();render();return}
-  const t=e.target.closest("[data-t]");if(t){tab=t.dataset.t;render();return}
+  const lg=e.target.closest("[data-l]");if(lg){lang=lg.dataset.l;cat="전체";tab="wait";touched={};stampSet();render();return}
+  const t=e.target.closest("[data-t]");if(t){tab=t.dataset.t;touched={};render();return}
   const c=e.target.closest("[data-c]");if(c){cat=c.dataset.c;render();return}
   const f=e.target.closest("[data-f]");if(f){rf=f.dataset.f;render();return}
   const li=e.target.closest("li[data-k]");if(!li)return;
@@ -181,7 +182,7 @@ document.addEventListener("click",e=>{
   const act=a.dataset.a;
   if(act==="copy"){copy(b.t,a);return}
   if(act==="read"){S.read[k]=1;delete S.pick[k]}
-  if(act==="unread"){S.read[k]=0}
+  if(act==="unread"){S.read[k]=0;touched[k]=1}
   if(act==="hold"){S.hold[k]=1;delete S.pick[k]}
   if(act==="unhold"){delete S.hold[k]}
   save();render();
