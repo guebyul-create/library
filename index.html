@@ -143,11 +143,13 @@ function count(){
 }
 function render(){
   const list=ALL().filter(b=>!isRY(b)&&!isBor(b)).sort(cmp);
-  const by={};list.forEach(b=>{(by[cls(b)]=by[cls(b)]||[]).push(b)});
+  const pn=b=>{const m=b.c.match(/^([A-Z]+)\s/);return m?m[1]:""};
+  const by={};list.forEach(b=>{const g=pre(b)*20+(cls(b)+1);(by[g]=by[g]||[]).push(b)});
   let h="";
-  for(const c of Object.keys(by).map(Number).sort((a,b)=>a-b)){
-    const nm=c<0?"기타":(c*100)+" "+KDC[c];
-    h+=`<div class="shelf">${nm}<span>${by[c].length}권</span></div><ul>${by[c].map(b=>row(b,"list")).join("")}</ul>`;
+  for(const g of Object.keys(by).map(Number).sort((a,b)=>a-b)){
+    const f=by[g][0],c=cls(f),p=pn(f);
+    const nm=(p?p+" · ":"")+(c<0?"기타":(c*100)+" "+KDC[c]);
+    h+=`<div class="shelf">${nm}<span>${by[g].length}권</span></div><ul>${by[g].map(b=>row(b,"list")).join("")}</ul>`;
   }
   $("out").innerHTML=h||'<div class="empty">빌릴 책이 없어요</div>';
   const bl=ALL().filter(b=>isBor(b)&&!isRY(b)).sort(cmp);
