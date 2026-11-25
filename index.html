@@ -151,7 +151,7 @@ function render(){
   }
   $("out").innerHTML=h||'<div class="empty">빌릴 책이 없어요</div>';
   const bl=ALL().filter(b=>isBor(b)&&!isRY(b)).sort(cmp);
-  $("tabs").innerHTML=[["wait","대기",list.length],["bor","빌림",bl.length]].map(([id,n,c])=>`<button type="button" data-t="${id}" aria-pressed="${tab===id}">${n}<small>${c}</small></button>`).join("");
+  $("tabs").innerHTML=[["wait","대출가능",list.length],["bor","빌린책",bl.length]].map(([id,n,c])=>`<button type="button" data-t="${id}" aria-pressed="${tab===id}">${n}<small>${c}</small></button>`).join("");
   if(tab==="bor")$("out").innerHTML=bl.length?`<ul>${bl.map(b=>row(b,"bor")).join("")}</ul>`:'<div class="empty">빌린 책이 없어요</div>';
   document.querySelector(".dock").hidden=tab==="bor";
   $("lang").innerHTML=[["ko","중앙"],["en","송파영어"]].map(([id,n])=>`<button type="button" data-l="${id}" aria-pressed="${lang===id}">${n}</button>`).join("");
@@ -159,7 +159,7 @@ function render(){
 }
 document.addEventListener("click",e=>{
   const tb=e.target.closest("[data-t]");if(tb){tab=tb.dataset.t;render();scrollTo(0,0);return}
-  const lg=e.target.closest("[data-l]");if(lg){lang=lg.dataset.l;render();scrollTo(0,0);return}
+  const lg=e.target.closest("[data-l]");if(lg){lang=lg.dataset.l;tab="wait";render();scrollTo(0,0);return}
   const x=e.target.closest("[data-x]");if(x){const rows=[];[["한글",BOOKS],["영어",EBOOKS]].forEach(([n,arr])=>arr.forEach(b=>{if(isBor(b)&&!isRY(b))rows.push(S.borrow[key(b)]+"\t"+n+"\t"+b.c+"\t"+b.t)}));copy(rows.join("\n"),x);return}
   const li=e.target.closest("li[data-k]");if(!li)return;
   const k=li.dataset.k,b=[...BOOKS,...EBOOKS].find(y=>key(y)===k),a=e.target.closest("[data-a]");
