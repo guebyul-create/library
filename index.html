@@ -151,7 +151,7 @@ function render(){
   $("out").innerHTML=h||'<div class="empty">빌릴 책이 없어요</div>';
   const bl=ALL().filter(b=>isBor(b)&&!isRY(b)).sort(cmp);
   $("tabs").innerHTML=[["wait","대기",list.length],["bor","빌림",bl.length]].map(([id,n,c])=>`<button type="button" data-t="${id}" aria-pressed="${tab===id}">${n}<small>${c}</small></button>`).join("");
-  if(tab==="bor")$("out").innerHTML=bl.length?`<button type="button" class="ex" data-x="exp">시트에 넣을 목록 복사</button><ul>${bl.map(b=>row(b,"bor")).join("")}</ul>`:'<div class="empty">빌린 책이 없어요</div>';
+  if(tab==="bor")$("out").innerHTML=bl.length?`<ul>${bl.map(b=>row(b,"bor")).join("")}</ul>`:'<div class="empty">빌린 책이 없어요</div>';
   document.querySelector(".dock").hidden=tab==="bor";
   $("lang").innerHTML=[["ko","중앙"],["en","송파영어"]].map(([id,n])=>`<button type="button" data-l="${id}" aria-pressed="${lang===id}">${n}</button>`).join("");
   count();
@@ -165,15 +165,21 @@ document.addEventListener("click",e=>{
   if(e.target.matches("input[type=checkbox]")){if(e.target.checked){S.pick[k]=1;li.classList.add("got")}else{delete S.pick[k];li.classList.remove("got")}save();count();return}
   if(!a)return;
   if(a.dataset.a==="copy"){copy(b.t,a);return}
-  if(a.dataset.a==="unborrow"){delete S.borrow[k];save();render()}
+  if(a.dataset.a==="unborrow"){delete S.borrow[k];save();render();sync({a:"del",keys:[k]},"빌림을 취소했어요")}
 });
+const API="https://script.google.com/macros/s/AKfycbwOyN83j5F956TU8HLYKoyL44oWOd5a-wQ52LLwdNpceYy8ad6PZtyUII1yGXh0R-rQ_Q/exec";
+function applyServer(list){S.borrow={};list.forEach(x=>{S.borrow[x.k]=x.d});save();render()}
+async function pull(){try{const r=await fetch(API);const j=await r.json();applyServer(j.borrow)}catch(e){}}
+async function sync(body,msg){try{const r=await fetch(API,{method:"POST",body:JSON.stringify(body)});const j=await r.json();applyServer(j.borrow);toast(msg)}catch(e){toast("저장이 안 됐어요. 인터넷 확인 후 다시 눌러 주세요");pull()}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
 $("bb").addEventListener("click",()=>{
-  const d=new Date().toISOString().slice(0,10);let n=0;
-  [...BOOKS,...EBOOKS].forEach(b=>{const k=key(b);if(S.pick[k]&&!isBor(b)&&!isRY(b)){S.borrow[k]=d;n++}delete S.pick[k]});
-  save();render();toast(n+"권 빌림으로 옮겼어요");
+  const d=new Date().toISOString().slice(0,10);const items=[];
+  [...BOOKS,...EBOOKS].forEach(b=>{const k=key(b);if(S.pick[k]&&!isBor(b)&&!isRY(b)){S.borrow[k]=d;items.push({k,d,l:BOOKS.includes(b)?"중앙":"송파영어",c:b.c,t:b.t})}delete S.pick[k]});
+  save();render();if(items.length)sync({a:"add",items},items.length+"권 빌림으로 저장했어요");
 });
 $("stamp").textContent=CHECKED+" 확인 · 청구기호 순";
 render();
+pull();
 </script>
 </body>
 </html>
