@@ -209,7 +209,7 @@ async gtitle(isbn){if(RC.mem[isbn]!==undefined)return RC.mem[isbn];let t='';
  try{const r=await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn);const j=await r.json();const v=j.items&&j.items[0]&&j.items[0].volumeInfo;if(v)t=v.title||''}catch(e){}
  if(!t){try{const r=await fetch('https://openlibrary.org/api/books?bibkeys=ISBN:'+isbn+'&format=json&jscmd=data');const j=await r.json();const v=j['ISBN:'+isbn];if(v)t=v.title||''}catch(e){}}
  return RC.mem[isbn]=t},
-html(isbn,title,res){const n={Y:'영인',J:'제인'};const who=[...res.f].map(c=>n[c]).filter(Boolean);
+html(isbn,title,res){const n={Y:'영인',J:'제인'};const who=['Y','J'].filter(c=>res.f.includes(c)).map(c=>n[c]);
  let cls='rok',head='안 읽음 · 빌려도 좋아요';
  if(res.f){cls=res.how==='similar'?'rsim':'rread';head=(res.how==='similar'?'비슷한 책 읽음: ':'읽음: ')+who.join('·')}
  else if(!title){cls='rsim';head='책 이름을 못 찾았어요'}
